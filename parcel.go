@@ -47,7 +47,7 @@ func (s ParcelStore) Get(number int) (Parcel, error) {
 
 	err := row.Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 	if err != nil {
-		return p, err
+		return Parcel{}, err
 	}
 	return p, nil
 }
@@ -99,24 +99,25 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 func (s ParcelStore) SetAddress(number int, address string) error {
 	// реализуйте обновление адреса в таблице parcel
 	// менять адрес можно только если значение статуса registered
-	p, err := s.Get(number)
-	if err != nil {
-		return err
-	}
-
-	// проверяем статус
-	if p.Status != ParcelStatusRegistered {
-		return fmt.Errorf("нельзя изменить адрес, посылка уже %s", p.Status)
-	}
-
-	// обновляем адрес
-	_, err = s.db.Exec(
-		"UPDATE parcel SET address = :address WHERE number = :number",
+	res, err := s.db.Exec(
+		`UPDATE parcel
+		 SET address = :address
+		 WHERE number = :number AND status = :status`,
 		sql.Named("address", address),
 		sql.Named("number", number),
+		sql.Named("status", ParcelStatusRegistered),
 	)
 	if err != nil {
 		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return fmt.Errorf("нельзя изменить адрес, посылка уже не зарегистрирована")
 	}
 
 	return nil
@@ -126,23 +127,22 @@ func (s ParcelStore) Delete(number int) error {
 	// реализуйте удаление строки из таблицы parcel
 	// удалять строку можно только если значение статуса registered
 
-	p, err := s.Get(number)
-	if err != nil {
-		return err
-	}
-
-	// проверяем статус
-	if p.Status != ParcelStatusRegistered {
-		return fmt.Errorf("нельзя удалить посылку, она уже %s", p.Status)
-	}
-
-	// удаляем посылку
-	_, err = s.db.Exec(
-		"DELETE FROM parcel WHERE number = :number",
+	res, err := s.db.Exec(
+		`DELETE FROM parcel
+		 WHERE number = :number AND status = :status`,
 		sql.Named("number", number),
+		sql.Named("status", ParcelStatusRegistered),
 	)
 	if err != nil {
 		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return fmt.Errorf("нельзя удалить посылку, она уже не зарегистрирована")
 	}
 
 	return nil
