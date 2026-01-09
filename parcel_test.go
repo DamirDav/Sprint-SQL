@@ -92,7 +92,7 @@ func TestSetAddress(t *testing.T) {
 	// check
 	// получите добавленную посылку и убедитесь, что адрес обновился
 	storedParcel, err := store.Get(parcel.Number)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, newAddress, storedParcel.Address)
 
 }
@@ -119,7 +119,7 @@ func TestSetStatus(t *testing.T) {
 	require.NoError(t, err)
 	// получите добавленную посылку и убедитесь, что статус обновился
 	storedParcel, err := store.Get(parcel.Number)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, newStatus, storedParcel.Status)
 
 }
@@ -164,14 +164,14 @@ func TestGetByClient(t *testing.T) {
 	// get by client
 	storedParcels, err := store.GetByClient(client) // получите список посылок по идентификатору клиента, сохранённого в переменной client
 	// убедитесь в отсутствии ошибки
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	// убедитесь, что количество полученных посылок совпадает с количеством добавленных
 	assert.Len(t, storedParcels, len(parcels))
 	// check
 	for _, parcel := range storedParcels {
 		// в parcelMap лежат добавленные посылки, ключ - идентификатор посылки, значение - сама посылка
 		p, ok := parcelMap[parcel.Number]
-		require.True(t, ok, "получена неизвестная посылка")
+		assert.True(t, ok, "получена неизвестная посылка")
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
 		assert.Equal(t, p, parcel)

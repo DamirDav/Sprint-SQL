@@ -124,7 +124,7 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 }
 
 func (s ParcelStore) Delete(number int) error {
-	// реализуйте удаление строки из таблицы parcel
+	// реализовал удаление строки из таблицы parcel
 	// удалять строку можно только если значение статуса registered
 
 	res, err := s.db.Exec(
